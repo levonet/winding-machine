@@ -5,6 +5,8 @@ board: "ESP32 Dev Controller V4"
 
 start:
   must_home: false
+  deactivate_parking: true
+  check_limits: true
 
 stepping:
   engine: RMT
@@ -42,7 +44,7 @@ axes:
       limit_neg_pin: gpio.32
       limit_pos_pin: gpio.33
       limit_all_pin: NO_PIN
-      hard_limits: false
+      hard_limits: true
       pulloff_mm: 1.000
       tmc_2209:
         uart_num: 2
@@ -107,15 +109,15 @@ oled:
    radio_delay_ms: 1000
 
 control:
-  reset_pin: NO_PIN
-  feed_hold_pin: NO_PIN
-  cycle_start_pin: NO_PIN
+  reset_pin: gpio.39
+  feed_hold_pin: gpio.35
+  cycle_start_pin: gpio.34
   macro0_pin: NO_PIN
   macro1_pin: NO_PIN
   macro2_pin: NO_PIN
   macro3_pin: NO_PIN
   fault_pin: NO_PIN
-  estop_pin: NO_PIN
+  estop_pin: gpio.36
 
 status_outputs:
   report_interval_ms: 500
