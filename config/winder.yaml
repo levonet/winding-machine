@@ -27,7 +27,7 @@ axes:
   x:
     # (steps_per_mm * (max_rate_mm_per_min) / 60) = rate
     steps_per_mm: 400
-    max_rate_mm_per_min: 200
+    max_rate_mm_per_min: 1000
     acceleration_mm_per_sec2: 25
     max_travel_mm: 300
     homing:
@@ -39,7 +39,7 @@ axes:
       settle_ms: 500
 
     motor0:
-      limit_neg_pin: NO_PIN
+      limit_neg_pin: gpio.32
       limit_pos_pin: gpio.33
       limit_all_pin: NO_PIN
       hard_limits: false
@@ -95,19 +95,30 @@ sdcard:
   cs_pin: gpio.5
   card_detect_pin: NO_PIN
 
-# i2c0:
-#    sda_pin: gpio.14
-#    scl_pin: gpio.13
+i2c0:
+   sda_pin: gpio.21
+   scl_pin: gpio.22
 
-# oled:
-#    i2c_num: 0
-#    i2c_address: 60
-#    width: 128
-#    height: 64
-#    radio_delay_ms: 1000
+oled:
+   i2c_num: 0
+   i2c_address: 60
+   width: 128
+   height: 64
+   radio_delay_ms: 1000
 
 control:
   reset_pin: NO_PIN
   feed_hold_pin: NO_PIN
   cycle_start_pin: NO_PIN
+  macro0_pin: NO_PIN
+  macro1_pin: NO_PIN
+  macro2_pin: NO_PIN
+  macro3_pin: NO_PIN
+  fault_pin: NO_PIN
   estop_pin: NO_PIN
+
+status_outputs:
+  report_interval_ms: 500
+  run_pin: NO_PIN
+  hold_pin: NO_PIN
+  alarm_pin: NO_PIN
