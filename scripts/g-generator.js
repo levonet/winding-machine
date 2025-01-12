@@ -9,22 +9,8 @@ module.exports.run = (argv) => {
         process.exit(1)
     }
 
-    const position = {
-        wireLength: 0,                          /* Накопичується довжина намотаного. */
-
-        layer: 0,                               /* Шар */
-        direction: false,                       /* Якщо true рухаємось вперед, інакше назад. */
-        height: -1 * specs.wire.diameter / 2,   /* Умовна висота початкового шару. */
-
-        distance: 0,                            /* Дистанція між сторонами A та B. */
-        radiusA: 0,
-        radiusB: 0,
-
-        passed: 0,                              /* Пройдена дистанція в поточному шарі. */
-    }
-
     generateHead(specs)
-    generateWinding(specs, position)
+    generateWinding(specs)
     generateTail()
 }
 
@@ -132,7 +118,21 @@ function generateTail() {
     console.log(gcode.join('\n'))
 }
 
-function generateWinding(specs, position) {
+function generateWinding(specs) {
+    const position = {
+        wireLength: 0,                          /* Накопичується довжина намотаного. */
+
+        layer: 0,                               /* Шар */
+        direction: false,                       /* Якщо true рухаємось вперед, інакше назад. */
+        height: -1 * specs.wire.diameter / 2,   /* Умовна висота початкового шару. */
+
+        distance: 0,                            /* Дистанція між сторонами A та B. */
+        radiusA: 0,
+        radiusB: 0,
+
+        passed: 0,                              /* Пройдена дистанція в поточному шарі. */
+    }
+
     do {
         if (position.passed >= position.distance) {
             nextLayer(specs, position)

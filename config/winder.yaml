@@ -41,9 +41,7 @@ axes:
       settle_ms: 500
 
     motor0:
-      limit_neg_pin: gpio.32
-      limit_pos_pin: gpio.33
-      limit_all_pin: NO_PIN
+      limit_all_pin: gpio.33
       hard_limits: true
       pulloff_mm: 1.000
       tmc_2209:
@@ -74,12 +72,17 @@ axes:
     max_rate_mm_per_min: 1000.0
     acceleration_mm_per_sec2: 5.0
     max_travel_mm: 10000000
-    # homing:
-    #   cycle: 2
-    #   mpos_mm: 10
-    #   positive_direction: false
+    homing:
+      cycle: 2
+      mpos_mm: 0
+      positive_direction: false
+      seek_mm_per_min: 100.000
+      feed_mm_per_min: 100.000
 
     motor0:
+      limit_all_pin: gpio.32:low
+      hard_limits: false
+      pulloff_mm: 4.000
       standard_stepper:
         direction_pin: gpio.26
         step_pin: gpio.25
