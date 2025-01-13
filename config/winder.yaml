@@ -70,7 +70,7 @@ axes:
   y:
     steps_per_mm: 640.0
     max_rate_mm_per_min: 1000.0
-    acceleration_mm_per_sec2: 5.0
+    acceleration_mm_per_sec2: 1.25
     max_travel_mm: 10000000
     homing:
       cycle: 2

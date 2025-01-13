@@ -9,8 +9,8 @@ coil:
     angle: 10.4
   angle: 1.976
 wire:
-  diameter: 0.32
-  length: 275000
-speed: 1000
-turnYDistance: 10
+  diameter: 0.242
+  length: 127934
+speed: 250
+turnYDistance: 2.5
 shiftX: 8

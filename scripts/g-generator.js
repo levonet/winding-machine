@@ -101,8 +101,8 @@ function generateHead(specs) {
         'G94             ; Units per Minute Mode',
         'G21             ; Метрична система',
         'G54             ; Обнуляємо координату',
-        'G10 L2 P0 Y0    ; Обнуляємо координату',
         '$HX             ; Додому',
+        '$H              ; Додому',
         `G1 X${specs.shiftX} F1000    ; Shift X`,
         'M0              ; Пауза',
     ]
