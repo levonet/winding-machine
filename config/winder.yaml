@@ -82,7 +82,7 @@ axes:
     motor0:
       limit_all_pin: gpio.32:low
       hard_limits: false
-      pulloff_mm: 4.000
+      pulloff_mm: 1.07
       standard_stepper:
         direction_pin: gpio.26
         step_pin: gpio.25
