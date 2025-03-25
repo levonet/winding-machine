@@ -1,0 +1,17 @@
+---
+coil:
+  length: 75.0
+  sideA:
+    radius: 25.7
+    angle: 0
+  sideB:
+    radius: 25.7
+    angle: 65
+  angle: 0
+wire:
+  diameter: 0.242
+  length: 1500000
+speed: 256
+turnYDistance: 2.45
+shiftX: 0.2
+shiftY: 0.5
