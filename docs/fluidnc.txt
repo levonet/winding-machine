@@ -1,0 +1,45 @@
+
+http://192.168.1.137
+https://github.com/bdring/FluidNC
+http://wiki.fluidnc.com/en/features/wifi-quick-start
+https://www.billiam.org/2022/05/30/grbl-smooth-jogging
+http://wiki.fluidnc.com/en/config/axes
+
+# pio run -e wifi -t upload
+
+http://fluidnc001-1.local
+
+
+
+# sudo cu -s 115200 -l /dev/cu.usbserial-0001
+~.
+
+
+#python3 -m pip install pyinstaller
+#cd fluidterm
+#python3 -m PyInstaller --onefile fluidterm.py
+#python fluidterm.py
+
+https://www.ohse.de/uwe/releases/lrzsz-0.12.20.tar.gz
+
+
+
+$XModem/Receive=index.html.gz
+$XModem/Receive=FluidNC/data/favicon.ico
+$XModem/Receive=FluidNC/data/config.yaml
+
+$localfs/list
+
+$bye
+
+
+
+just repeat run these gcode for 10000 times, and both MPS or the WPS show the right coordinate data at the first started running
+
+G01X10.0Y10.0Z10.0A10.0B10.0C10.0F1000
+G04P1.0
+G0X0Y0Z0A0B0C0
+G04P1.0
+..........
+M30
+
