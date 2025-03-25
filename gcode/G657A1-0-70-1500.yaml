@@ -1,0 +1,19 @@
+---
+coil:
+  length: 69.4
+  sideA:
+    radius: 32.08
+    angle: 0
+  sideB:
+    radius: 32.05
+    angle: 0
+  angle: 0
+wire:
+  diameter: 0.26
+  length: 1500000
+firstLayerSpeed: 200
+speed: 200
+# leadY: 2.5
+turnYDistance: 2.5
+shiftX: 11.0
+shiftY: -0.665

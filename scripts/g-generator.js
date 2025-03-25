@@ -2,7 +2,7 @@ const { program } = require('commander')
 const yaml = require('js-yaml')
 const fs   = require('fs')
 
-module.exports.run = (argv) => {
+function run (argv) {
 
     const specs = init(argv)
     if (specs === null) {
@@ -33,7 +33,7 @@ function init(argv) {
     }
 
     try {
-        return yaml.load(fs.readFileSync(options.config, 'utf8'))
+        return yaml.load(fs.readFileSync(options.config, 'utf8')) /* TODO: Spec validator */
     } catch (error) {
         console.error(error.message)
     }
@@ -66,9 +66,20 @@ function nextLayer(specs, position) {
     position.radiusB = specs.coil.sideB.radius
         + Math.sqrt(position.height * position.height + outspreadB * outspreadB)
         * Math.cos(Math.PI / 180 * (specs.coil.sideB.angle + specs.coil.angle))
+
+    return position
+}
+
+function getSpeed(specs, position) {
+    if (Object.hasOwn(specs, 'firstLayerSpeed') && position.layer === 1) {
+        return specs.firstLayerSpeed
+    }
+
+    return specs.speed
 }
 
 function makeTurn(specs, position) {
+    /* TODO: Support of diagonal winding */
     const fullTurnShift = rotationRatio(specs, specs.wire.diameter)
 
     let turnShift = (position.passed + fullTurnShift <= position.distance)
@@ -91,7 +102,7 @@ function makeTurn(specs, position) {
         position.wireLength += circumference
     }
 
-    return `G1 F${specs.speed} X${turnShift * ((position.direction) ? 1 : -1)} Y${specs.turnYDistance * turnShift / fullTurnShift} ; ${Math.round(position.wireLength)}`
+    return `G1 F${getSpeed(specs, position)} X${turnShift * ((position.direction) ? 1 : -1)} Y${specs.turnYDistance * turnShift / fullTurnShift} ; ${Math.round(position.wireLength)}`
 }
 
 function generateHead(specs) {
@@ -102,7 +113,7 @@ function generateHead(specs) {
         'G21             ; Метрична система',
         'G54             ; Обнуляємо координату',
         '$H              ; Додому',
-        `G1 X${specs.shiftX} F1000    ; Shift X`,
+        `G1 X${specs.shiftX} Y${specs.shiftY} F${getSpeed(specs, {layer: 1})} ; Shift X & Y`,
         'M0              ; Пауза',
     ]
 
@@ -135,8 +146,15 @@ function generateWinding(specs) {
     do {
         if (position.passed >= position.distance) {
             nextLayer(specs, position)
+            console.log(`; Start Layer D: ${2 * (position.direction ? position.radiusA : position.radiusB)}`);
         }
 
         console.log(makeTurn(specs, position))
     } while (position.wireLength < specs.wire.length)
+}
+
+module.exports = {
+    run,
+    nextLayer,
+    makeTurn,
 }

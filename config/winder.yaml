@@ -68,11 +68,14 @@ axes:
       null_motor:
 
   y:
-    steps_per_mm: 640.0
+    # 16 pulses per step
+    steps_per_mm: 1280.0
     max_rate_mm_per_min: 1000.0
     acceleration_mm_per_sec2: 1.25
     max_travel_mm: 10000000
     homing:
+      # A value of -1 means the machine will not move, but the current machine position (mpos)
+      # position of the axis will be set to the mpos_mm value for the axis.
       cycle: 2
       mpos_mm: 0
       positive_direction: false
@@ -82,7 +85,7 @@ axes:
     motor0:
       limit_all_pin: gpio.32:low
       hard_limits: false
-      pulloff_mm: 1.07
+      pulloff_mm: 0.3125
       standard_stepper:
         direction_pin: gpio.26
         step_pin: gpio.25
