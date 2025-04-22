@@ -122,6 +122,9 @@ function generateHead(specs) {
 
 function generateTail() {
     const gcode = [
+        'M0              ; Пауза',
+        'G90             ; Абсолютні координати',
+        'G0 X400         ; Піднімаємо',
         'M2',
     ]
 
