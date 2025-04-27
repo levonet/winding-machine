@@ -112,8 +112,8 @@ function generateHead(specs) {
         'G94             ; Units per Minute Mode',
         'G21             ; Метрична система',
         'G54             ; Обнуляємо координату',
+        'G4 P1.5         ; Wait for 1.5 seconds before homming',
         '$H              ; Додому',
-        `G1 X${specs.shiftX} Y${specs.shiftY} F${getSpeed(specs, {layer: 1})} ; Shift X & Y`,
         'M0              ; Пауза',
     ]
 

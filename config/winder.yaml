@@ -116,16 +116,22 @@ oled:
    height: 64
    radio_delay_ms: 1000
 
+macros:
+  macro0: $SD/Run=f242-d64-l69.4-1550.gcode
+  macro1: $SD/Run=f260-d64-l69.4-1550.gcode
+  # Shift X & Y to start position
+  after_homing: G1X1.3Y-0.9F300
+
 control:
-  reset_pin: gpio.39
+  reset_pin: NO_PIN
   feed_hold_pin: gpio.35
   cycle_start_pin: gpio.34
-  macro0_pin: NO_PIN
-  macro1_pin: NO_PIN
+  macro0_pin: gpio.39
+  macro1_pin: gpio.36
   macro2_pin: NO_PIN
   macro3_pin: NO_PIN
   fault_pin: NO_PIN
-  estop_pin: gpio.36
+  estop_pin: NO_PIN
 
 status_outputs:
   report_interval_ms: 500

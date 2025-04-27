@@ -1,18 +1,18 @@
 ---
 coil:
-  length: 69.4
+  length: 118
   sideA:
-    radius: 32.08
+    # (64.29+64.02+64.04)/3/2
+    radius: 32.058
     angle: 0
   sideB:
-    radius: 32.05
+    # (64.14+63.81+63.89)/3/2
+    radius: 31.973
     angle: 0
   angle: 0
 wire:
   diameter: 0.242
-  length: 1500000
+  length: 15050000
 firstLayerSpeed: 300
 speed: 600
 turnYDistance: 10
-shiftX: 1.6
-shiftY: -0.9
