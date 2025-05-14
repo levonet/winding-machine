@@ -2,6 +2,9 @@ const { program } = require('commander')
 const yaml = require('js-yaml')
 const fs   = require('fs')
 
+const WIDTH  = 1
+const HEIGHT = 2
+
 function run (argv) {
 
     const specs = init(argv)
@@ -41,6 +44,18 @@ function init(argv) {
     return null
 }
 
+function wireDiameter(specs, side = 0) {
+    if (side === WIDTH) {
+        return specs.wire.diameter + (specs.wire.diameterWidthCorrection || 0)
+    }
+
+    if (side === HEIGHT) {
+        return specs.wire.diameter + (specs.wire.diameterHeightCorrection || 0)
+    }
+
+    return specs.wire.diameter
+}
+
 function rotationRatio(specs, value) {
     return value * Math.cos(Math.PI / 180 * specs.coil.angle)
 }
@@ -49,12 +64,12 @@ function nextLayer(specs, position) {
     position.layer++
     position.passed = 0
     position.direction = !position.direction
-    position.height += specs.wire.diameter
+    position.height += wireDiameter(specs, HEIGHT)
 
-    position.distance = rotationRatio(specs, specs.coil.length
-        + (position.height + ((!position.direction) ? specs.wire.diameter : 0))
+    position.distance = rotationRatio(specs, (specs.coil.length -  wireDiameter(specs, WIDTH))
+        + (position.height + ((!position.direction) ? wireDiameter(specs, WIDTH) : 0))
             * Math.tan(Math.PI / 180 * specs.coil.sideA.angle)
-        + (position.height + ((position.direction) ? specs.wire.diameter : 0))
+        + (position.height + ((position.direction) ? wireDiameter(specs, WIDTH) : 0))
             * Math.tan(Math.PI / 180 * specs.coil.sideB.angle))
 
     const outspreadA = position.height * Math.tan(Math.PI / 180 * specs.coil.sideA.angle)
@@ -80,7 +95,7 @@ function getSpeed(specs, position) {
 
 function makeTurn(specs, position) {
     /* TODO: Support of diagonal winding */
-    const fullTurnShift = rotationRatio(specs, specs.wire.diameter)
+    const fullTurnShift = rotationRatio(specs, wireDiameter(specs, WIDTH))
 
     let turnShift = (position.passed + fullTurnShift <= position.distance)
         ? fullTurnShift
@@ -137,7 +152,7 @@ function generateWinding(specs) {
 
         layer: 0,                               /* Шар */
         direction: false,                       /* Якщо true рухаємось вперед, інакше назад. */
-        height: -1 * specs.wire.diameter / 2,   /* Умовна висота початкового шару. */
+        height: -1 * wireDiameter(specs, HEIGHT) / 2, /* Умовна висота початкового шару. */
 
         distance: 0,                            /* Дистанція між сторонами A та B. */
         radiusA: 0,
@@ -149,7 +164,7 @@ function generateWinding(specs) {
     do {
         if (position.passed >= position.distance) {
             nextLayer(specs, position)
-            console.log(`; Start Layer D: ${2 * (position.direction ? position.radiusA : position.radiusB)}`);
+            console.log(`; Start Layer ${position.layer} D: ${2 * (position.direction ? position.radiusA : position.radiusB)}`);
         }
 
         console.log(makeTurn(specs, position))

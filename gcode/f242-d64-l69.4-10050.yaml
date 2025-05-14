@@ -1,0 +1,19 @@
+---
+coil:
+  length: 69.45
+  sideA:
+    radius: 32.08
+    angle: 0
+  sideB:
+    radius: 32.05
+    angle: 0
+  angle: 0
+wire:
+  diameter: 0.242
+  diameterWidthCorrection: 0.01646
+  diameterHeightCorrection: 0
+  length: 10050000
+firstLayerSpeed: 300
+speed: 600
+turnYDistance: 10
+# 33947 Start Layer 126 D: 124.84200000000016

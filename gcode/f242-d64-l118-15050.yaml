@@ -1,6 +1,6 @@
 ---
 coil:
-  length: 118
+  length: 117.8
   sideA:
     # (64.29+64.02+64.04)/3/2
     radius: 32.058
@@ -11,7 +11,11 @@ coil:
     angle: 0
   angle: 0
 wire:
+  # 8 / 486 => 0.01646 + 0.242 => 0.25846
+  # Old Layer D: 116.63
+  # New Layer D: 122.26
   diameter: 0.242
+  diameterWidthCorrection: 0.01646
   length: 15050000
 firstLayerSpeed: 300
 speed: 600
