@@ -1,0 +1,82 @@
+{
+  "type": "object",
+  "properties": {
+    "coil": {
+      "type": "object",
+      "properties": {
+        "length": {
+          "type": "number"
+        },
+        "sideA": {
+          "type": "object",
+          "properties": {
+            "radius": {
+              "type": "number"
+            },
+            "angle": {
+              "type": "number",
+              "default": 0
+            }
+          },
+          "required": ["radius"],
+          "additionalProperties": false
+        },
+        "sideB": {
+          "type": "object",
+          "properties": {
+            "radius": {
+              "type": "number"
+            },
+            "angle": {
+              "type": "number",
+              "default": 0
+            }
+          },
+          "required": ["radius"],
+          "additionalProperties": false
+        },
+        "angle": {
+          "type": "number",
+          "default": 0
+        }
+      },
+      "required": ["length", "sideA", "sideB"],
+      "additionalProperties": false
+    },
+    "wire": {
+      "type": "object",
+      "properties": {
+        "diameter": {
+          "type": "number"
+        },
+        "diameterWidthCorrection": {
+          "type": "number",
+          "default": 0
+        },
+        "diameterHeightCorrection": {
+          "type": "number",
+          "default": 0
+        },
+        "length": {
+          "type": "number"
+        }
+      },
+      "required": ["diameter", "length"],
+      "additionalProperties": false
+    },
+    "firstLayerSpeed": {
+      "type": "number",
+      "default": 200
+    },
+    "speed": {
+      "type": "number",
+      "default": 400
+    },
+    "turnYDistance": {
+      "type": "number",
+      "default": 10
+    }
+  },
+  "required": ["coil", "wire"],
+  "additionalProperties": false
+}

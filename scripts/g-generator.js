@@ -1,6 +1,9 @@
 const { program } = require('commander')
+const Ajv = require('ajv')
 const yaml = require('js-yaml')
 const fs   = require('fs')
+
+const schema = require('./specs-schema.json')
 
 const WIDTH  = 1
 const HEIGHT = 2
@@ -9,6 +12,14 @@ function run (argv) {
 
     const specs = init(argv)
     if (specs === null) {
+        process.exit(1)
+    }
+
+    const ajv = new Ajv({useDefaults: true})
+    const validate = ajv.compile(schema)
+
+    if (!validate(specs)) {
+        console.error(validate.errors)
         process.exit(1)
     }
 
@@ -155,8 +166,8 @@ function generateWinding(specs) {
         height: -1 * wireDiameter(specs, HEIGHT) / 2, /* Умовна висота початкового шару. */
 
         distance: 0,                            /* Дистанція між сторонами A та B. */
-        radiusA: 0,
-        radiusB: 0,
+        radiusA: 0,                             /* Радіус шару на початку котушки. */
+        radiusB: 0,                             /* Радіус шару на кінці котушки. */
 
         passed: 0,                              /* Пройдена дистанція в поточному шарі. */
     }
@@ -164,7 +175,7 @@ function generateWinding(specs) {
     do {
         if (position.passed >= position.distance) {
             nextLayer(specs, position)
-            console.log(`; Start Layer ${position.layer} D: ${2 * (position.direction ? position.radiusA : position.radiusB)}`);
+            console.log(`; Layer ${position.layer} D: ${2 * (position.direction ? position.radiusA : position.radiusB)}`);
         }
 
         console.log(makeTurn(specs, position))
