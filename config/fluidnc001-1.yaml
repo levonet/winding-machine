@@ -1,5 +1,5 @@
-name: "Winder"
-board: "ESP32 Dev Controller V4"
+name: fluidnc001-1
+board: ESP32 Dev Controller V4
 
 # junction_deviation_mm: 0.01 .. 1
 
@@ -120,8 +120,9 @@ macros:
   macro0: $SD/Run=f242-d64-l69.4-1550.gcode
   macro1: $SD/Run=f260-d64-l69.4-1550.gcode
   # Shift X & Y to start position
-  # after_homing: G1X1.3Y-0.9F300
-  after_homing: G1X2.2Y-0.9F300
+  # after_homing: G1X1.5Y-0.9F300
+  # after_homing: G1X2.3Y-0.9F300
+  after_homing: G1X0.85Y-0.9F300
 
 control:
   reset_pin: NO_PIN
@@ -136,6 +137,6 @@ control:
 
 status_outputs:
   report_interval_ms: 500
-  run_pin: NO_PIN
-  hold_pin: NO_PIN
-  alarm_pin: NO_PIN
+  run_pin: gpio.4
+  hold_pin: gpio.2
+  alarm_pin: gpio.15

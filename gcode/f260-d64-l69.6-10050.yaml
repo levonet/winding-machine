@@ -1,0 +1,14 @@
+---
+coil:
+  length: 69.6
+  sideA:
+    radius: 32.05
+  sideB:
+    radius: 32.05
+wire:
+  diameter: 0.26
+  diameterWidthCorrection: 0.00564
+  length: 10050000
+firstLayerSpeed: 300
+speed: 666
+turnYDistance: 10
