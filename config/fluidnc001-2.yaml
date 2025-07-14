@@ -29,7 +29,7 @@ axes:
     steps_per_mm: 400
     max_rate_mm_per_min: 1000
     acceleration_mm_per_sec2: 25
-    max_travel_mm: 460
+    max_travel_mm: 600
     homing:
       cycle: 2
       mpos_mm: 0
@@ -57,9 +57,10 @@ axes:
         toff_coolstep: 3
         run_mode: StealthChop
         homing_mode: StealthChop
-        homing_amps: 0.250
+        homing_amps: 0.500
         use_enable: false
-        direction_pin: gpio.12
+        # Inverted direction
+        direction_pin: gpio.12:low
         step_pin: gpio.13
         disable_pin: gpio.14
 
