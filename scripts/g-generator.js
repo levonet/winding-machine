@@ -47,7 +47,7 @@ function init(argv) {
     }
 
     try {
-        return yaml.load(fs.readFileSync(options.config, 'utf8')) /* TODO: Spec validator */
+        return yaml.load(fs.readFileSync(options.config, 'utf8'))
     } catch (error) {
         console.error(error.message)
     }

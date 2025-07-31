@@ -1,0 +1,22 @@
+---
+coil:
+  length: 70.80
+  sideA:
+    # (63.54+63.30+63.57)/3/2 = 31.735
+    radius: 31.735
+    angle: 0
+  sideB:
+    # (63.5+63.33+63.55)/3/2 = 31.73
+    radius: 31.73
+    angle: 0
+  angle: 0
+wire:
+  diameter: 0.230
+  # 21/307 = 0,0684
+  # 6/262 = 0.0229 + 0.06912
+  diameterWidthCorrection: 0.0684
+  # diameterHeightCorrection: 0
+  length: 10050000
+firstLayerSpeed: 300
+speed: 600
+turnYDistance: 10

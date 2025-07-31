@@ -10,6 +10,8 @@ coil:
   angle: 0
 wire:
   diameter: 0.26
+  # 5/266 = 0,0188
+  diameterWidthCorrection: 0.0100
   length: 1550000
 firstLayerSpeed: 300
 speed: 600
