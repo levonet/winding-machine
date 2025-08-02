@@ -1,13 +1,12 @@
 ---
 coil:
-  length: 151.5
+  length: 151
   sideA:
     radius: 30.0
     angle: 0
   sideB:
     radius: 30.0
     angle: 45.0
-  angle: 0
 wire:
   diameter: 0.230
   # 16/599 = 0,0684
@@ -16,5 +15,5 @@ wire:
   diameterHeightCorrection: -0.0068
   length: 10050000
 firstLayerSpeed: 300
-speed: 1000
+speed: 600
 turnYDistance: 10

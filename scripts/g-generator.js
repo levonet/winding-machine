@@ -67,8 +67,13 @@ function wireDiameter(specs, side = 0) {
     return specs.wire.diameter
 }
 
+function planeAngle(specs) {
+    return 180 / Math.PI
+        * Math.atan((specs.coil.sideB.radius - specs.coil.sideA.radius) / specs.coil.length)
+}
+
 function rotationRatio(specs, value) {
-    return value * Math.cos(Math.PI / 180 * specs.coil.angle)
+    return value * Math.cos(Math.PI / 180 * planeAngle(specs))
 }
 
 function nextLayer(specs, position) {
@@ -86,12 +91,12 @@ function nextLayer(specs, position) {
     const outspreadA = position.height * Math.tan(Math.PI / 180 * specs.coil.sideA.angle)
     position.radiusA = specs.coil.sideA.radius
         + Math.sqrt(position.height * position.height + outspreadA * outspreadA)
-        * Math.cos(Math.PI / 180 * (specs.coil.sideA.angle - specs.coil.angle))
+        * Math.cos(Math.PI / 180 * (specs.coil.sideA.angle - planeAngle(specs)))
 
     const outspreadB = position.height * Math.tan(Math.PI / 180 * specs.coil.sideB.angle)
     position.radiusB = specs.coil.sideB.radius
         + Math.sqrt(position.height * position.height + outspreadB * outspreadB)
-        * Math.cos(Math.PI / 180 * (specs.coil.sideB.angle + specs.coil.angle))
+        * Math.cos(Math.PI / 180 * (specs.coil.sideB.angle + planeAngle(specs)))
 
     return position
 }

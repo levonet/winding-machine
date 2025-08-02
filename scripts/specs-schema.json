@@ -34,10 +34,6 @@
           },
           "required": ["radius"],
           "additionalProperties": false
-        },
-        "angle": {
-          "type": "number",
-          "default": 0
         }
       },
       "required": ["length", "sideA", "sideB"],

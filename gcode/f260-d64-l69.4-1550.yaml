@@ -7,7 +7,6 @@ coil:
   sideB:
     radius: 32.05
     angle: 0
-  angle: 0
 wire:
   diameter: 0.26
   # 5/266 = 0,0188

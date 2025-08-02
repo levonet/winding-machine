@@ -1,4 +1,6 @@
 .pio
 .ipynb_checkpoints
+*.orig
+*.diff
 node_modules
 /gcode/*.gcode
