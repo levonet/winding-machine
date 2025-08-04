@@ -109,31 +109,46 @@ function getSpeed(specs, position) {
     return specs.speed
 }
 
-function makeTurn(specs, position) {
-    /* TODO: Support of diagonal winding */
+/* Returns the factor for movement by the axis
+ */
+function turnShift(specs, position) {
     const fullTurnShift = rotationRatio(specs, wireDiameter(specs, WIDTH))
 
-    let turnShift = (position.passed + fullTurnShift <= position.distance)
-        ? fullTurnShift
-        : position.distance - position.passed
+    if (position.passed + fullTurnShift <= position.distance) {
+        return 1
+    }
+
+    return (position.distance - position.passed) / fullTurnShift
+}
+
+function makeTurn(specs, position) {
+    const shiftFactor = turnShift(specs, position)
 
     const radius = (position.radiusA - position.radiusB)
         * ((position.direction)
             ? (position.passed / position.distance)
             : 1 - (position.passed / position.distance))
-        * turnShift / fullTurnShift
+        * shiftFactor
 
     const circumference = (position.radiusA + radius) * 2 * Math.PI
 
+    let shiftX = rotationRatio(specs, wireDiameter(specs, WIDTH)) * shiftFactor
+    let shiftY = specs.turnYDistance * shiftFactor
+
     if (position.wireLength + circumference > specs.wire.length) {
-        turnShift *= ((position.wireLength + circumference - specs.wire.length) / circumference)
+        const endFactor = ((position.wireLength + circumference - specs.wire.length) / circumference)
+
+        shiftX *= endFactor
+        shiftY *= endFactor
         position.wireLength = specs.wire.length
     } else {
-        position.passed += turnShift
+        position.passed += shiftX
         position.wireLength += circumference
     }
 
-    return `G1 F${getSpeed(specs, position)} X${turnShift * ((position.direction) ? 1 : -1)} Y${specs.turnYDistance * turnShift / fullTurnShift} ; ${Math.round(position.wireLength)}`
+    shiftX *= (position.direction) ? 1 : -1;
+
+    return `G1 F${getSpeed(specs, position)} X${shiftX} Y${shiftY} ; ${Math.round(position.wireLength)}`
 }
 
 function generateHead(specs) {
