@@ -67,38 +67,71 @@ function wireDiameter(specs, side = 0) {
     return specs.wire.diameter
 }
 
-function planeAngle(specs) {
+/* Повертає кут нахилу площини намотки від сторони A.
+ */
+function planeAngle(specs, level) {
+    // TODO: розраховувати для кожного рівня/шару окремо, так як теоретично ми можемо змінити кут для рівня
+    // FIXIT: виправити всі planeAngle(specs, 0)
     return 180 / Math.PI
-        * Math.atan((specs.coil.sideB.radius - specs.coil.sideA.radius) / specs.coil.length)
+        * Math.atan((specs.coil[level].sideB.radius - specs.coil[level].sideA.radius) / specs.coil[level].length)
 }
 
-function rotationRatio(specs, value) {
-    return value * Math.cos(Math.PI / 180 * planeAngle(specs))
+/* Коефіцієнт відступу по X для урахування нахилу площини намотки.
+ */
+function rotationRatio(specs, level,  value) {
+    return value * Math.cos(Math.PI / 180 * planeAngle(specs, 0)) // FIXIT
 }
 
-function nextLayer(specs, position) {
+function calcNextLayer(specs, position) {
     position.layer++
     position.passed = 0
     position.direction = !position.direction
-    position.height += wireDiameter(specs, HEIGHT)
 
-    position.distance = rotationRatio(specs, (specs.coil.length -  wireDiameter(specs, WIDTH))
-        + (position.height + ((!position.direction) ? wireDiameter(specs, WIDTH) : 0))
-            * Math.tan(Math.PI / 180 * specs.coil.sideA.angle)
-        + (position.height + ((position.direction) ? wireDiameter(specs, WIDTH) : 0))
-            * Math.tan(Math.PI / 180 * specs.coil.sideB.angle))
+    const oldRadiusA = position.radiusA
+    const oldRadiusB = position.radiusB
 
-    const outspreadA = position.height * Math.tan(Math.PI / 180 * specs.coil.sideA.angle)
-    position.radiusA = specs.coil.sideA.radius
-        + Math.sqrt(position.height * position.height + outspreadA * outspreadA)
-        * Math.cos(Math.PI / 180 * (specs.coil.sideA.angle - planeAngle(specs)))
+    const increaseDistanceA = wireDiameter(specs, HEIGHT)
+        * Math.tan(Math.PI / 180 * (specs.coil[position.level].sideA.angle - position.planeAngle))
+    const increaseDistanceB = wireDiameter(specs, HEIGHT)
+        * Math.tan(Math.PI / 180 * (specs.coil[position.level].sideB.angle + position.planeAngle))
 
-    const outspreadB = position.height * Math.tan(Math.PI / 180 * specs.coil.sideB.angle)
-    position.radiusB = specs.coil.sideB.radius
-        + Math.sqrt(position.height * position.height + outspreadB * outspreadB)
-        * Math.cos(Math.PI / 180 * (specs.coil.sideB.angle + planeAngle(specs)))
+    const deltaDistance = wireDiameter(specs, HEIGHT)
+        * Math.tan(Math.PI / 180 * position.planeAngle)
 
-    return position
+    position.distance += increaseDistanceA + increaseDistanceB
+
+    const shiftXA = (increaseDistanceA + deltaDistance)
+        * Math.cos(Math.PI / 180 * position.planeAngle)
+
+    const shiftXB = (increaseDistanceB - deltaDistance)
+        * Math.cos(Math.PI / 180 * position.planeAngle)
+
+    const increaseRadiusA = wireDiameter(specs, HEIGHT)
+        / Math.cos(Math.PI / 180 * position.planeAngle)
+        - shiftXA * Math.tan(Math.PI / 180 * position.planeAngle)
+
+    const increaseRadiusB = wireDiameter(specs, HEIGHT)
+        / Math.cos(Math.PI / 180 * position.planeAngle)
+        + shiftXB * Math.tan(Math.PI / 180 * position.planeAngle)
+
+    position.radiusA += increaseRadiusA
+    position.radiusB += increaseRadiusB
+
+    console.error(';',
+        'Turn to new layer:', position.layer,
+        'Distance:', position.distance,
+        'Radius A:', position.radiusA,
+        'Radius B:', position.radiusB)
+
+    if (position.direction) {
+        const circumferenceA = (oldRadiusA + (position.radiusA - oldRadiusA) / 2) * 2 * Math.PI
+
+        return getStep(specs, position, shiftXA, specs.turnYDistance, circumferenceA, false)
+    }
+
+    const circumferenceB = (oldRadiusB + (position.radiusB - oldRadiusB) / 2) * 2 * Math.PI
+
+    return getStep(specs, position, shiftXB, specs.turnYDistance, circumferenceB, true)
 }
 
 function getSpeed(specs, position) {
@@ -112,7 +145,7 @@ function getSpeed(specs, position) {
 /* Returns the factor for movement by the axis
  */
 function turnShift(specs, position) {
-    const fullTurnShift = rotationRatio(specs, wireDiameter(specs, WIDTH))
+    const fullTurnShift = rotationRatio(specs, position.level, wireDiameter(specs, WIDTH))
 
     if (position.passed + fullTurnShift <= position.distance) {
         return 1
@@ -124,16 +157,26 @@ function turnShift(specs, position) {
 function makeTurn(specs, position) {
     const shiftFactor = turnShift(specs, position)
 
-    const radius = (position.radiusA - position.radiusB)
-        * ((position.direction)
-            ? (position.passed / position.distance)
-            : 1 - (position.passed / position.distance))
-        * shiftFactor
+    const currentRadius = position.radiusA
+        + position.passed * Math.sin(Math.PI / 180 * position.planeAngle)
 
-    const circumference = (position.radiusA + radius) * 2 * Math.PI
+    const passed = position.passed + wireDiameter(specs, WIDTH) * shiftFactor
+    position.passed = (passed > position.distance) ? position.distance : passed
 
-    let shiftX = rotationRatio(specs, wireDiameter(specs, WIDTH)) * shiftFactor
-    let shiftY = specs.turnYDistance * shiftFactor
+    const targetRadius = position.radiusA
+        + (position.passed) * Math.sin(Math.PI / 180 * position.planeAngle)
+
+    const circumference = (currentRadius + (targetRadius - currentRadius) / 2) * 2 * Math.PI
+
+    const shiftX = rotationRatio(specs, position.level, wireDiameter(specs, WIDTH)) * shiftFactor
+    const shiftY = specs.turnYDistance * shiftFactor
+
+    return getStep(specs, position, shiftX, shiftY, circumference, position.direction)
+}
+
+function getStep(specs, position, x, y, circumference, direction) {
+    let shiftX = x
+    let shiftY = y
 
     if (position.wireLength + circumference > specs.wire.length) {
         const endFactor = ((position.wireLength + circumference - specs.wire.length) / circumference)
@@ -142,11 +185,10 @@ function makeTurn(specs, position) {
         shiftY *= endFactor
         position.wireLength = specs.wire.length
     } else {
-        position.passed += shiftX
         position.wireLength += circumference
     }
 
-    shiftX *= (position.direction) ? 1 : -1;
+    shiftX *= (direction) ? 1 : -1;
 
     return `G1 F${getSpeed(specs, position)} X${shiftX} Y${shiftY} ; ${Math.round(position.wireLength)}`
 }
@@ -177,24 +219,42 @@ function generateTail() {
     console.log(gcode.join('\n'))
 }
 
+function distance(radiusA, radiusB, length) {
+    const delta = Math.abs(radiusA - radiusB)
+
+    return Math.sqrt(length * length + delta * delta)
+}
+
 function generateWinding(specs) {
     const position = {
         wireLength: 0,                          /* Накопичується довжина намотаного. */
 
-        layer: 0,                               /* Шар */
-        direction: false,                       /* Якщо true рухаємось вперед, інакше назад. */
-        height: -1 * wireDiameter(specs, HEIGHT) / 2, /* Умовна висота початкового шару. */
+        layer: 1,                               /* Шар. */
+        level: 0,                               /* Рівень конфігурації шарів. */
+        direction: true,                        /* Якщо true рухаємось вперед, інакше назад. */
 
-        distance: 0,                            /* Дистанція між сторонами A та B. */
-        radiusA: 0,                             /* Радіус шару на початку котушки. */
-        radiusB: 0,                             /* Радіус шару на кінці котушки. */
+        planeAngle: planeAngle(specs, 0),
+        // TODO: перерахувати з урахуванням height, кутів і відступу напівдіаметру від стінок.
+                                                /* Дистанція між точкою A та B. */
+        distance: distance(specs.coil[0].sideA.radius, specs.coil[0].sideB.radius, specs.coil[0].length),
+        // TODO: радіуси перерахувати з урахуванням зміщення height та по кутам відхилу стінки та площини
+        radiusA: specs.coil[0].sideA.radius,    /* Радіус шару на початку котушки. */
+        radiusB: specs.coil[0].sideB.radius,    /* Радіус шару на кінці котушки. */
 
         passed: 0,                              /* Пройдена дистанція в поточному шарі. */
     }
 
     do {
         if (position.passed >= position.distance) {
-            nextLayer(specs, position)
+            const lastDistance = position.distance
+            const lastRadiusA = position.radiusA
+            const lastRadiusB = position.radiusB
+
+            console.log(calcNextLayer(specs, position))
+            if (position.wireLength >= specs.wire.length) {
+                break
+            }
+
             console.log(`; Layer ${position.layer} D: ${2 * (position.direction ? position.radiusA : position.radiusB)}`);
         }
 
@@ -204,6 +264,6 @@ function generateWinding(specs) {
 
 module.exports = {
     run,
-    nextLayer,
+    calcNextLayer,
     makeTurn,
 }

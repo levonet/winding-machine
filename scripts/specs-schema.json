@@ -2,42 +2,45 @@
   "type": "object",
   "properties": {
     "coil": {
-      "type": "object",
-      "properties": {
-        "length": {
-          "type": "number"
-        },
-        "sideA": {
-          "type": "object",
-          "properties": {
-            "radius": {
-              "type": "number"
-            },
-            "angle": {
-              "type": "number",
-              "default": 0
-            }
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "length": {
+            "type": ["number", "null"]
           },
-          "required": ["radius"],
-          "additionalProperties": false
-        },
-        "sideB": {
-          "type": "object",
-          "properties": {
-            "radius": {
-              "type": "number"
+          "sideA": {
+            "type": "object",
+            "properties": {
+              "radius": {
+                "type": "number"
+              },
+              "angle": {
+                "type": "number",
+                "default": 0
+              }
             },
-            "angle": {
-              "type": "number",
-              "default": 0
-            }
+            "required": ["radius"],
+            "additionalProperties": false
           },
-          "required": ["radius"],
-          "additionalProperties": false
-        }
+          "sideB": {
+            "type": "object",
+            "properties": {
+              "radius": {
+                "type": "number"
+              },
+              "angle": {
+                "type": "number",
+                "default": 0
+              }
+            },
+            "required": ["radius"],
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
       },
-      "required": ["length", "sideA", "sideB"],
-      "additionalProperties": false
+      "minItems": 1
     },
     "wire": {
       "type": "object",
