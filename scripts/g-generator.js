@@ -178,7 +178,7 @@ function calcNextLayer(specs, position) {
             // FIXIT: Це копіпаст sideB, потрібно виправити напрямок відхилення кутів.
             const startRadiusA = specs.coil[position.level].sideA.radius
             const startShiftA1 = (position.radiusA - startRadiusA) * Math.tan(Math.PI / 180 * oldAngleA)
-            const pathOldAtoStartA = startShiftA1 / Math.sin(Math.PI / 180 * oldAngleA)
+            const pathOldAtoStartA = (oldAngleA) ? startShiftA1 / Math.sin(Math.PI / 180 * oldAngleA) : 0
             const angleA = specs.coil[position.level].sideA.angle - oldAngleA
             const pathOldAtoA0 = (pathOldAtoStartA * Math.sin(Math.PI / 180 * (angleA)))
                 / Math.sin(Math.PI / 180 * (180 + angleA + (oldAngleA + position.planeAngle - 90)))
@@ -193,7 +193,7 @@ function calcNextLayer(specs, position) {
         if (!position.direction) {
             const startRadiusB = specs.coil[position.level].sideB.radius
             const startShiftB1 = (position.radiusB - startRadiusB) * Math.tan(Math.PI / 180 * oldAngleB)
-            const pathOldBtoStartB = startShiftB1 / Math.sin(Math.PI / 180 * oldAngleB)
+            const pathOldBtoStartB = (oldAngleB) ? startShiftB1 / Math.sin(Math.PI / 180 * oldAngleB) : 0
             const angleB = specs.coil[position.level].sideB.angle - oldAngleB
             const pathOldBtoB0 = (pathOldBtoStartB * Math.sin(Math.PI / 180 * (angleB)))
                 / Math.sin(Math.PI / 180 * (180 + angleB + (oldAngleB + position.planeAngle - 90)))
@@ -212,7 +212,7 @@ function calcNextLayer(specs, position) {
 
     position.distance += change.increaseDistanceA + change.increaseDistanceB
     if (position.distance <= 0) {
-        throw new Error(`distance has wrong length: ${position.distance}`)
+        throw new Error(`'distance' has wrong length: ${position.distance}`)
     }
 
     position.radiusA += change.increaseRadiusA
@@ -339,8 +339,12 @@ function generateWinding(specs) {
                                                 /* Дистанція між точкою A та B. */
         distance: distance(specs.coil[0].sideA.radius, specs.coil[0].sideB.radius, specs.coil[0].length),
         // TODO: радіуси перерахувати з урахуванням зміщення height та по кутам відхилу стінки та площини
-        radiusA: specs.coil[0].sideA.radius,    /* Радіус шару на початку котушки. */
-        radiusB: specs.coil[0].sideB.radius,    /* Радіус шару на кінці котушки. */
+                                                /* Радіус шару на початку котушки. */
+        radiusA: specs.coil[0].sideA.radius + wireDiameter(specs, HEIGHT) / 2,
+        // radiusA: specs.coil[0].sideA.radius,
+                                                /* Радіус шару на кінці котушки. */
+        radiusB: specs.coil[0].sideB.radius + wireDiameter(specs, HEIGHT) / 2,
+        // radiusB: specs.coil[0].sideB.radius,
 
         passed: 0,                              /* Пройдена дистанція в поточному шарі. */
     }
