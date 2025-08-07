@@ -23,7 +23,7 @@ function run (argv) {
         process.exit(1)
     }
 
-    generateHead(specs)
+    generateHead()
     generateWinding(specs)
     generateTail()
 }
@@ -55,6 +55,45 @@ function init(argv) {
     return null
 }
 
+function isInLevel(specs, position, radiusA, radiusB) {
+    if (specs.coil.length === (position.level + 1)) {
+        return true
+    }
+
+    if (specs.coil.length > (position.level + 1)) {
+        if (position.direction
+            && Object.hasOwn(specs.coil[position.level + 1], 'sideA')
+            && specs.coil[position.level + 1].sideA.radius <= radiusA) {
+            return false
+        }
+
+        if (!position.direction
+            && Object.hasOwn(specs.coil[position.level + 1], 'sideB')
+            && specs.coil[position.level + 1].sideB.radius <= radiusB) {
+            return false
+        }
+    }
+
+    return true
+}
+
+function switchLevel(specs, position) {
+    // TODO: Зараз не підтримується одночасна зміна кута з обох боків.
+    // Для цього маємо помітити сторону, де відбулись зміни відносно попереднього рівня.
+    if (!Object.hasOwn(specs.coil[position.level + 1], 'sideA')) {
+        specs.coil[position.level + 1].sideA = specs.coil[position.level].sideA
+    }
+
+    if (!Object.hasOwn(specs.coil[position.level + 1], 'sideB')) {
+        specs.coil[position.level + 1].sideB = specs.coil[position.level].sideB
+    }
+
+    // Довжина використовується тільки на етапі ініціалізації
+    // specs.coil[position.level + 1].length = specs.coil[position.level].length
+
+    position.level++
+}
+
 function wireDiameter(specs, side = 0) {
     if (side === WIDTH) {
         return specs.wire.diameter + (specs.wire.diameterWidthCorrection || 0)
@@ -82,23 +121,14 @@ function rotationRatio(specs, level,  value) {
     return value * Math.cos(Math.PI / 180 * planeAngle(specs, 0)) // FIXIT
 }
 
-function calcNextLayer(specs, position) {
-    position.layer++
-    position.passed = 0
-    position.direction = !position.direction
-
-    const oldRadiusA = position.radiusA
-    const oldRadiusB = position.radiusB
-
-    const increaseDistanceA = wireDiameter(specs, HEIGHT)
+function newLayerChanges(specs, position) {
+    const increaseDistanceA = wireDiameter(specs, WIDTH)
         * Math.tan(Math.PI / 180 * (specs.coil[position.level].sideA.angle - position.planeAngle))
-    const increaseDistanceB = wireDiameter(specs, HEIGHT)
+    const increaseDistanceB = wireDiameter(specs, WIDTH)
         * Math.tan(Math.PI / 180 * (specs.coil[position.level].sideB.angle + position.planeAngle))
 
-    const deltaDistance = wireDiameter(specs, HEIGHT)
+    const deltaDistance = wireDiameter(specs, WIDTH)
         * Math.tan(Math.PI / 180 * position.planeAngle)
-
-    position.distance += increaseDistanceA + increaseDistanceB
 
     const shiftXA = (increaseDistanceA + deltaDistance)
         * Math.cos(Math.PI / 180 * position.planeAngle)
@@ -114,11 +144,82 @@ function calcNextLayer(specs, position) {
         / Math.cos(Math.PI / 180 * position.planeAngle)
         + shiftXB * Math.tan(Math.PI / 180 * position.planeAngle)
 
-    position.radiusA += increaseRadiusA
-    position.radiusB += increaseRadiusB
+    return {
+        increaseDistanceA,
+        increaseDistanceB,
+        shiftXA,
+        shiftXB,
+        increaseRadiusA,
+        increaseRadiusB
+    }
+}
+
+function calcNextLayer(specs, position) {
+    position.layer++
+    position.passed = 0
+    position.direction = !position.direction
+
+    const oldRadiusA = position.radiusA
+    const oldRadiusB = position.radiusB
+
+    let change = newLayerChanges(specs, position)
+
+    if (!isInLevel(specs, position, position.radiusA + change.increaseRadiusA,
+        position.radiusB + change.increaseRadiusB)) {
+
+        const oldAngleA = specs.coil[position.level].sideA.angle
+        const oldAngleB = specs.coil[position.level].sideB.angle
+        switchLevel(specs, position)
+
+        let shiftA0 = 0
+        let shiftB0 = 0
+
+        if (position.direction) {
+            // FIXIT: Це копіпаст sideB, потрібно виправити напрямок відхилення кутів.
+            const startRadiusA = specs.coil[position.level].sideA.radius
+            const startShiftA1 = (position.radiusA - startRadiusA) * Math.tan(Math.PI / 180 * oldAngleA)
+            const pathOldAtoStartA = startShiftA1 / Math.sin(Math.PI / 180 * oldAngleA)
+            const angleA = specs.coil[position.level].sideA.angle - oldAngleA
+            const pathOldAtoA0 = (pathOldAtoStartA * Math.sin(Math.PI / 180 * (angleA)))
+                / Math.sin(Math.PI / 180 * (180 + angleA + (oldAngleA + position.planeAngle - 90)))
+            const heightA0 = (pathOldAtoA0) * Math.sin(Math.PI / 180 * position.planeAngle)
+            shiftA0 = rotationRatio(specs, position.level, pathOldAtoA0)
+            const radiusA0 = startRadiusA + (position.radiusA - startRadiusA + heightA0)
+
+            position.distance += pathOldAtoA0
+            position.radiusA = radiusA0
+        }
+
+        if (!position.direction) {
+            const startRadiusB = specs.coil[position.level].sideB.radius
+            const startShiftB1 = (position.radiusB - startRadiusB) * Math.tan(Math.PI / 180 * oldAngleB)
+            const pathOldBtoStartB = startShiftB1 / Math.sin(Math.PI / 180 * oldAngleB)
+            const angleB = specs.coil[position.level].sideB.angle - oldAngleB
+            const pathOldBtoB0 = (pathOldBtoStartB * Math.sin(Math.PI / 180 * (angleB)))
+                / Math.sin(Math.PI / 180 * (180 + angleB + (oldAngleB + position.planeAngle - 90)))
+            const heightB0 = (pathOldBtoB0) * Math.sin(Math.PI / 180 * position.planeAngle)
+            shiftB0 = rotationRatio(specs, position.level, pathOldBtoB0)
+            const radiusB0 = startRadiusB + (position.radiusB - startRadiusB + heightB0)
+
+            position.distance += pathOldBtoB0
+            position.radiusB = radiusB0
+        }
+
+        change = newLayerChanges(specs, position)
+        change.shiftXA += shiftA0
+        change.shiftXB += shiftB0
+    }
+
+    position.distance += change.increaseDistanceA + change.increaseDistanceB
+    if (position.distance <= 0) {
+        throw new Error(`distance has wrong length: ${position.distance}`)
+    }
+
+    position.radiusA += change.increaseRadiusA
+    position.radiusB += change.increaseRadiusB
 
     console.error(';',
-        'Turn to new layer:', position.layer,
+        'Turn to new LL:', position.level, ':', position.layer,
         'Distance:', position.distance,
         'Radius A:', position.radiusA,
         'Radius B:', position.radiusB)
@@ -126,12 +227,12 @@ function calcNextLayer(specs, position) {
     if (position.direction) {
         const circumferenceA = (oldRadiusA + (position.radiusA - oldRadiusA) / 2) * 2 * Math.PI
 
-        return getStep(specs, position, shiftXA, specs.turnYDistance, circumferenceA, false)
+        return getStep(specs, position, change.shiftXA, specs.turnYDistance, circumferenceA, false)
     }
 
     const circumferenceB = (oldRadiusB + (position.radiusB - oldRadiusB) / 2) * 2 * Math.PI
 
-    return getStep(specs, position, shiftXB, specs.turnYDistance, circumferenceB, true)
+    return getStep(specs, position, change.shiftXB, specs.turnYDistance, circumferenceB, true)
 }
 
 function getSpeed(specs, position) {
@@ -193,7 +294,7 @@ function getStep(specs, position, x, y, circumference, direction) {
     return `G1 F${getSpeed(specs, position)} X${shiftX} Y${shiftY} ; ${Math.round(position.wireLength)}`
 }
 
-function generateHead(specs) {
+function generateHead() {
     const gcode = [
         'G0              ; Rapid Motion',
         'G91             ; Відносні координати',
@@ -246,11 +347,13 @@ function generateWinding(specs) {
 
     do {
         if (position.passed >= position.distance) {
-            const lastDistance = position.distance
-            const lastRadiusA = position.radiusA
-            const lastRadiusB = position.radiusB
+            try {
+                console.log(calcNextLayer(specs, position))
+            } catch (err) {
+                console.error(err)
+                break
+            }
 
-            console.log(calcNextLayer(specs, position))
             if (position.wireLength >= specs.wire.length) {
                 break
             }
