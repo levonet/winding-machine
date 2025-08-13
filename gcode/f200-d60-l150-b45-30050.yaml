@@ -1,0 +1,32 @@
+---
+coil:
+- length: 151
+  sideA:
+    radius: 29.9
+    angle: 0
+  sideB:
+    radius: 29.9
+    angle: 45.0
+- sideB:
+    radius: 50
+    angle: 48.8683891343
+- sideB:
+    radius: 52
+    angle: 57.4706480736
+- sideB:
+    radius: 54
+    angle: 69.4765196961
+- sideB:
+    radius: 56
+    angle: -86
+
+wire:
+  diameter: 0.200
+  # 16/599 = 0,0684
+  diameterWidthCorrection: 0.043
+  # (92.89-92.4)/72
+  diameterHeightCorrection: -0.0068
+  length: 30250000
+firstLayerSpeed: 300
+speed: 600
+turnYDistance: 10

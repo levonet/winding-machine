@@ -119,7 +119,7 @@ macros:
   macro0: $SD/Run=f242-d64-l69.4-1550.gcode
   macro1: G90&G0X400
   # Shift X & Y to start position
-  after_homing: G1X3.85Y-0.9F300
+  after_homing: G1X1.35Y-0.9F300
 
 control:
   reset_pin: NO_PIN

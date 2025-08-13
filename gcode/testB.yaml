@@ -1,0 +1,18 @@
+---
+coil:
+- length: 99.2546
+  sideA:
+    radius: 42.5
+    angle: 30
+  sideB:
+    radius: 54.6869
+    angle: 0
+    # angle: 38.0
+- sideB:
+    radius: 100
+    angle: -60
+wire:
+  diameter: 25
+  length: 16000
+speed: 600
+turnYDistance: 10
