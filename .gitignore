@@ -1,5 +1,6 @@
 .pio
 .ipynb_checkpoints
+.DS_Store
 *.orig
 *.diff
 node_modules

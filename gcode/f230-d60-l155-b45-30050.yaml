@@ -1,6 +1,6 @@
 ---
 coil:
-- length: 154.5
+- length: 154.0
   sideA:
     radius: 29.9
     angle: 0
@@ -18,7 +18,7 @@ coil:
     angle: -86.0
 wire:
   diameter: 0.230
-  diameterWidthCorrection: 0.043
+  diameterWidthCorrection: 0.033
   diameterHeightCorrection: -0.0068
   length: 30050000
 firstLayerSpeed: 300

@@ -302,7 +302,7 @@ function generateHead() {
         'G21             ; Метрична система',
         'G54             ; Обнуляємо координату',
         'G4 P1.5         ; Wait for 1.5 seconds before homming',
-        '$H              ; Додому',
+        '$H',           // Додому
         'M0              ; Пауза',
     ]
 

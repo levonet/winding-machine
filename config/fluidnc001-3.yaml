@@ -76,14 +76,14 @@ axes:
     homing:
       # A value of -1 means the machine will not move, but the current machine position (mpos)
       # position of the axis will be set to the mpos_mm value for the axis.
-      cycle: 2
+      cycle: -1
       mpos_mm: 0
       positive_direction: false
       seek_mm_per_min: 100.000
       feed_mm_per_min: 100.000
 
     motor0:
-      limit_all_pin: gpio.32:low
+      # limit_all_pin: gpio.32:low
       hard_limits: false
       pulloff_mm: 0.3125
       standard_stepper:
@@ -116,10 +116,11 @@ oled:
    radio_delay_ms: 1000
 
 macros:
-  macro0: $SD/Run=f242-d64-l69.4-1550.gcode
+  macro0: $SD/Run=f230-d60-l155-b45-30050.gcode
   macro1: G90&G0X400
   # Shift X & Y to start position
-  after_homing: G1X1.35Y-0.9F300
+  after_homing: G1X1.35F300
+  # after_homing: G1X1.35Y-0.9F300
 
 control:
   reset_pin: NO_PIN
