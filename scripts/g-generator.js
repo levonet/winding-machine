@@ -8,6 +8,8 @@ const schema = require('./specs-schema.json')
 const WIDTH  = 1
 const HEIGHT = 2
 
+let stepByRotation = false
+
 function run (argv) {
 
     const specs = init(argv)
@@ -32,9 +34,12 @@ function init(argv) {
     program
         .option('-c, --config <file>', 'Path to config file.')
         .option('-o, --output <file>', 'Path to gcode file.')
+        .option('-s, --by-step', 'Generate step by one roration.')
         .parse(argv)
 
     const options = program.opts()
+
+    stepByRotation = options.byStep
 
     if (typeof options.config === 'undefined') {
         console.error(new Error('Can\'t select config file').message)
@@ -227,12 +232,16 @@ function calcNextLayer(specs, position) {
     if (position.direction) {
         const circumferenceA = (oldRadiusA + (position.radiusA - oldRadiusA) / 2) * 2 * Math.PI
 
-        return getStep(specs, position, change.shiftXA, specs.turnYDistance, circumferenceA, false)
+        const step = calcStep(specs, position, change.shiftXA, specs.turnYDistance, circumferenceA, false);
+
+        return printStep(specs, position, step.shiftX, step.shiftY)
     }
 
     const circumferenceB = (oldRadiusB + (position.radiusB - oldRadiusB) / 2) * 2 * Math.PI
 
-    return getStep(specs, position, change.shiftXB, specs.turnYDistance, circumferenceB, true)
+    const step = calcStep(specs, position, change.shiftXB, specs.turnYDistance, circumferenceB, true);
+
+    return printStep(specs, position, step.shiftX, step.shiftY)
 }
 
 function getSpeed(specs, position) {
@@ -272,10 +281,27 @@ function makeTurn(specs, position) {
     const shiftX = rotationRatio(specs, position.level, wireDiameter(specs, WIDTH)) * shiftFactor
     const shiftY = specs.turnYDistance * shiftFactor
 
-    return getStep(specs, position, shiftX, shiftY, circumference, position.direction)
+    return calcStep(specs, position, shiftX, shiftY, circumference, position.direction)
 }
 
-function getStep(specs, position, x, y, circumference, direction) {
+function makeFullMovement(specs, position) {
+    let fullShiftX = 0
+    let fullShiftY = 0
+
+    do {
+        const step = makeTurn(specs, position)
+
+        fullShiftX += step.shiftX
+        fullShiftY += step.shiftY
+    } while (position.passed < position.distance)
+
+    return {
+        shiftX: fullShiftX,
+        shiftY: fullShiftY,
+    }
+}
+
+function calcStep(specs, position, x, y, circumference, direction) {
     let shiftX = x
     let shiftY = y
 
@@ -291,7 +317,14 @@ function getStep(specs, position, x, y, circumference, direction) {
 
     shiftX *= (direction) ? 1 : -1;
 
-    return `G1 F${getSpeed(specs, position)} X${shiftX} Y${shiftY} ; ${Math.round(position.wireLength)}`
+    return {
+        shiftX,
+        shiftY,
+    }
+}
+
+function printStep(specs, position, x, y) {
+    return `G1 F${getSpeed(specs, position)} X${x} Y${y} ; ${Math.round(position.wireLength)}`
 }
 
 function generateHead() {
@@ -365,7 +398,8 @@ function generateWinding(specs) {
             console.log(`; Layer ${position.layer} D: ${2 * (position.direction ? position.radiusA : position.radiusB)}`);
         }
 
-        console.log(makeTurn(specs, position))
+        const step = (stepByRotation) ? makeTurn(specs, position) : makeFullMovement(specs, position)
+        console.log(printStep(specs, position, step.shiftX, step.shiftY))
     } while (position.wireLength < specs.wire.length)
 }
 

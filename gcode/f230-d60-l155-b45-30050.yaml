@@ -18,8 +18,8 @@ coil:
     angle: -86.0
 wire:
   diameter: 0.230
-  diameterWidthCorrection: 0.033
-  diameterHeightCorrection: -0.0068
+  diameterWidthCorrection: 0.023
+  # diameterHeightCorrection: -0.0068
   length: 30050000
 firstLayerSpeed: 300
 speed: 600
