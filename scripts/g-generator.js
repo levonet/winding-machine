@@ -159,7 +159,7 @@ function newLayerChanges(specs, position) {
     }
 }
 
-function calcNextLayer(specs, position) {
+function makeNextLayer(specs, position) {
     position.layer++
     position.passed = 0
     position.direction = !position.direction
@@ -232,16 +232,12 @@ function calcNextLayer(specs, position) {
     if (position.direction) {
         const circumferenceA = (oldRadiusA + (position.radiusA - oldRadiusA) / 2) * 2 * Math.PI
 
-        const step = calcStep(specs, position, change.shiftXA, specs.turnYDistance, circumferenceA, false);
-
-        return printStep(specs, position, step.shiftX, step.shiftY)
+        return calcStep(specs, position, change.shiftXA, specs.turnYDistance, circumferenceA, false)
     }
 
     const circumferenceB = (oldRadiusB + (position.radiusB - oldRadiusB) / 2) * 2 * Math.PI
 
-    const step = calcStep(specs, position, change.shiftXB, specs.turnYDistance, circumferenceB, true);
-
-    return printStep(specs, position, step.shiftX, step.shiftY)
+    return calcStep(specs, position, change.shiftXB, specs.turnYDistance, circumferenceB, true)
 }
 
 function getSpeed(specs, position) {
@@ -385,7 +381,8 @@ function generateWinding(specs) {
     do {
         if (position.passed >= position.distance) {
             try {
-                console.log(calcNextLayer(specs, position))
+                const step = makeNextLayer(specs, position)
+                console.log(printStep(specs, position, step.shiftX, step.shiftY))
             } catch (err) {
                 console.error(err)
                 break
@@ -405,6 +402,9 @@ function generateWinding(specs) {
 
 module.exports = {
     run,
-    calcNextLayer,
+    distance,
+    wireDiameter,
+    makeNextLayer,
     makeTurn,
+    makeFullMovement,
 }
